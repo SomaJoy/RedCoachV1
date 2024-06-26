@@ -13,7 +13,7 @@ public class BusDto {
 
     private Long id;
     private String busNo;
-    private String totalSeats;
+    private Integer totalSeats;
     private String route;
 
 }
