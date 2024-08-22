@@ -20,7 +20,7 @@ public class UserRegistration {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private UUID userId;
 
     @Column(name = "user_name", nullable = false, unique = true, length = 40)
     private String userName;

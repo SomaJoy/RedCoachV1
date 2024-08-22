@@ -11,9 +11,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BusDto {
 
-    private Long id;
+    private Long busId;
     private String busNo;
-    private String totalSeats;
+    private Integer totalSeats;
     private String route;
 
 }

@@ -1,6 +1,8 @@
 package com.redCoach.service.impl;
 
 import com.redCoach.entity.UserRegistration;
+import com.redCoach.exception.InvalidLoginException;
+import com.redCoach.exception.RegistrationException;
 import com.redCoach.payload.LoginDto;
 import com.redCoach.payload.UserRegistrationDto;
 import com.redCoach.repository.UserRegistrationRepository;
@@ -27,19 +29,36 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
     @Override
     public UserRegistration createUser(UserRegistrationDto userRegistrationDto) {
-        UserRegistration userRegistration = mapToUserRegistration(userRegistrationDto);
-        userRegistration.setPassword(BCrypt.hashpw(userRegistrationDto.getPassword(), BCrypt.gensalt(4)));
-        UserRegistration saveUser = userRegistrationRepository.save(userRegistration);
-        return saveUser;
+        //Optional<UserRegistration> existingUser = userRegistrationRepository.findByUserNameOrEmail(userRegistrationDto.getUserName(), userRegistrationDto.getEmail());
+        if(userRegistrationRepository.existsByUserName(userRegistrationDto.getUserName())){
+            throw new RegistrationException("Username already exists");
+        }
+        if(userRegistrationRepository.existsByEmail(userRegistrationDto.getEmail())){
+            throw new RegistrationException("Email already exists");
+        }
+        try {
+            UserRegistration userRegistration = mapToUserRegistration(userRegistrationDto);
+            userRegistration.setPassword(BCrypt.hashpw(userRegistrationDto.getPassword(), BCrypt.gensalt(4)));
+            UserRegistration saveUser = userRegistrationRepository.save(userRegistration);
+            return saveUser;
+        }
+        catch (Exception e) {
+            throw new RegistrationException("Registration failed.");
+        }
     }
 
     @Override
     public String verifyLogin(LoginDto loginDto) {
-        Optional<UserRegistration> opUser = userRegistrationRepository.findByUserName(loginDto.getUserName());
+        Optional<UserRegistration> opUser = userRegistrationRepository.findByUserNameOrEmail(loginDto.getUserNameOrEmail(), loginDto.getUserNameOrEmail());
         if(opUser.isPresent()){
-            UserRegistration userRegistration = opUser.get();
-            if(BCrypt.checkpw(loginDto.getPassword(), userRegistration.getPassword())){
-                return jwtService.generateToken(userRegistration);
+            try{
+                UserRegistration userRegistration = opUser.get();
+                if (BCrypt.checkpw(loginDto.getPassword(), userRegistration.getPassword())) {
+                    return jwtService.generateToken(userRegistration);
+                }
+            }
+            catch (Exception e) {
+                throw new InvalidLoginException("Invalid Username or Password.");
             }
         }
         return null;

@@ -1,6 +1,7 @@
 package com.redCoach.service.impl;
 
 import com.redCoach.entity.Bus;
+import com.redCoach.exception.BusException;
 import com.redCoach.payload.BusDto;
 import com.redCoach.repository.BusRepository;
 import com.redCoach.service.BusService;
@@ -18,9 +19,17 @@ public class BusServiceImpl implements BusService {
 
     @Override
     public Bus addBus(BusDto busDto) {
-        Bus bus = mapToEntity(busDto);
-        Bus saveBus = busRepository.save(bus);
-        return saveBus;
+        if(busRepository.existsByBusNo(busDto.getBusNo())){
+            throw new BusException("Bus already exists.");
+        }
+        try{
+            Bus bus = mapToEntity(busDto);
+            Bus saveBus = busRepository.save(bus);
+            return saveBus;
+        }
+        catch (Exception e) {
+            throw new BusException("Bus not added.");
+        }
     }
 
     public BusDto mapToDto(Bus bus){

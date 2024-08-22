@@ -20,11 +20,7 @@ public class UserRegistrationController {
     @PostMapping("/addUser")
     public ResponseEntity<String> createUser(@RequestBody UserRegistrationDto userRegistrationDto) {
         UserRegistration userRegistration = userRegistrationService.createUser(userRegistrationDto);
-        if (userRegistration != null) {
-            return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>("User registration failed", HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>("User registered successfully.", HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
